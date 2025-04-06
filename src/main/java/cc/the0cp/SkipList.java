@@ -3,6 +3,7 @@ package cc.the0cp;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class SkipList<K extends Comparable<K>, V>{
     /**
@@ -14,6 +15,9 @@ public class SkipList<K extends Comparable<K>, V>{
         K key;
         V value;
         int level;
+        /**
+         * forward list to store next node in different levels
+         */
         ArrayList<Node<K, V>> forward;
 
         Node(K key, V value, int level){
@@ -65,6 +69,43 @@ public class SkipList<K extends Comparable<K>, V>{
         this.header = new Node<>(null, null, MAX_LEVEL);
         this.curLevel = 0;
         this.nodeCnt = 0;
+    }
+
+    private Node<K, V> createNode(K key, V value, int level){
+        return new Node<>(key, value, level);
+    }
+
+    /**
+     * Generate random level for nodes
+     * @return level
+     */
+    private static int randomLevel(){
+        int level = 1;
+        Random rand = new Random();
+        while(rand.nextBoolean()){
+            level++;
+        }
+        return level;
+    }
+
+    /**
+     * Get size of the skip list
+     * @return node count
+     */
+    public int size(){
+        return this.nodeCnt;
+    }
+
+    public synchronized boolean insert(K key, V value){
+        Node<K, V> cur = this.header;
+        ArrayList<Node<K, V>> update = new ArrayList<>(Collections.nCopies(MAX_LEVEL + 1, null));
+
+        for(int i = this.curLevel; i >= 0; i--){
+            while(cur.forward.get(i) != null && cur.forward.get(i).getKey().compareTo(key) < 0){
+                cur = cur.forward.get(i);
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args){

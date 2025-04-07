@@ -1,7 +1,6 @@
-package cc.the0cp;
+package cc.the0cp.skiplist;
 
 import java.io.*;
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -177,9 +176,5 @@ public class SkipList<K extends Comparable<K>, V>{
             return new Node<K, V>(key, value, 0);
         }
         return null;
-    }
-
-    public static void main(String[] args){
-        System.out.print("Hello and welcome!");
     }
 }

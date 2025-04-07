@@ -143,6 +143,52 @@ public class SkipList<K extends Comparable<K>, V>{
         return false;
     }
 
+    public void saveFile(){
+        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(DATA_STORE))){
+            Node<K, V> node = this.header.forward.getFirst();
+            while(node != null){
+                StringBuilder data = new StringBuilder();
+                data.append(node.getKey()).append(':').append(node.getValue()).append(';');
+                bufferedWriter.write(data.toString());
+                bufferedWriter.newLine();
+                node = node.forward.getFirst();
+            }
+        }catch(IOException error){
+            throw new RuntimeException("Failed to save file: ", error);
+        }
+    }
+
+    public void loadFile(){
+        try(BufferedReader bufferedReader = new BufferedReader((new FileReader(DATA_STORE)))){
+            String data;
+            while((data = bufferedReader.readLine()) != null){
+                System.out.println(data);
+
+                Node<K, V> node = stringToNode(data);
+                if(node != null) {
+                    insert(node.getKey(), node.getValue());
+                }
+            }
+        }catch(IOException error){
+            throw new RuntimeException("Failed to load file: ", error);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public Node<K, V> stringToNode(String data){
+        if(data == null || data.isEmpty()){
+            return null;
+        }
+        if(data.contains(":") && data.contains(";")){
+            String keyString = data.substring(0, data.indexOf(":"));
+            K key = (K)keyString;
+            String valueString = data.substring(data.indexOf(":") + 1, data.length() - 1);
+            V value = (V)valueString;
+            return new Node<K, V>(key, value, 0);
+        }
+        return null;
+    }
+
     public static void main(String[] args){
         //System.out.printf("Hello and welcome!");
 

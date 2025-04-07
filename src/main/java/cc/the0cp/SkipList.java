@@ -90,14 +90,6 @@ public class SkipList<K extends Comparable<K>, V>{
     }
 
     /**
-     * Get size of the skip list
-     * @return node count
-     */
-    public int size(){
-        return this.nodeCnt;
-    }
-
-    /**
      * insert specific node
      * @param key   key of the node
      * @param value value of the node
@@ -147,9 +139,7 @@ public class SkipList<K extends Comparable<K>, V>{
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(DATA_STORE))){
             Node<K, V> node = this.header.forward.getFirst();
             while(node != null){
-                StringBuilder data = new StringBuilder();
-                data.append(node.getKey()).append(':').append(node.getValue()).append(';');
-                bufferedWriter.write(data.toString());
+                bufferedWriter.write(String.valueOf(node.getKey()) + ':' + node.getValue() + ';');
                 bufferedWriter.newLine();
                 node = node.forward.getFirst();
             }
@@ -190,10 +180,6 @@ public class SkipList<K extends Comparable<K>, V>{
     }
 
     public static void main(String[] args){
-        //System.out.printf("Hello and welcome!");
-
-        for(int i = 1; i <= 5; i++){
-            System.out.println("i = " + i);
-        }
+        System.out.print("Hello and welcome!");
     }
 }

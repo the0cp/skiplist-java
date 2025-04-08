@@ -35,10 +35,6 @@ public class SkipList<K extends Comparable<K>, V>{
             return this.value;
         }
 
-        public int getLevel() {
-            return this.level;
-        }
-
         public void setValue(V value) {
             this.value = value;
         }
@@ -89,6 +85,29 @@ public class SkipList<K extends Comparable<K>, V>{
     }
 
     /**
+     * search and get node value
+     * @param key node key to search
+     * @return the value of key node
+     */
+    public V get(K key){
+        Node<K, V> cur = this.header;
+
+        for(int i = this.curLevel; i >= 0; i--){
+            while(cur.forward.get(i) != null && cur.forward.get(i).getKey().compareTo(key) < 0){
+                cur = cur.forward.get(i);
+            }
+        }
+
+        cur = cur.forward.getFirst();
+
+        if(cur != null && cur.getKey().compareTo(key) == 0){
+            return cur.getValue();
+        }
+
+        return null;
+    }
+
+    /**
      * insert specific node
      * @param key   key of the node
      * @param value value of the node
@@ -134,6 +153,56 @@ public class SkipList<K extends Comparable<K>, V>{
         return false;
     }
 
+    /**
+     * delete node from skip list
+     * @param key target node's key
+     * @return true if successfully deleted
+     */
+    public synchronized boolean remove(K key){
+        Node<K, V> cur = this.header;
+        ArrayList<Node<K, V>> updateTable = new ArrayList<>(Collections.nCopies(MAX_LEVEL, null));
+
+        for(int i = this.curLevel; i >= 0; i--){
+            while(cur.forward.get(i) != null && cur.forward.get(i).getKey().compareTo(key) < 0){
+                cur = cur.forward.get(i);
+            }
+            updateTable.set(i, cur);
+        }
+
+        cur = cur.forward.getFirst();
+
+        if(cur != null && cur.getKey().compareTo(key) == 0){    // node found
+            for(int i = 0; i < this.curLevel; i++){
+                if(updateTable.get(i).forward.get(i) != cur){
+                    break;
+                }
+                updateTable.get(i).forward.set(i, cur.forward.get(i));
+            }
+        }
+
+        while(this.curLevel > 0 && this.header.forward.get(this.curLevel) == null){
+            this.curLevel--;    // update the list level
+        }
+
+        this.nodeCnt--;
+        return true;
+    }
+
+    /**
+     * list current skip list
+     */
+    public void list(){
+        for(int i = this.curLevel; i >= 0; i--){
+            Node<K, V> node = this.header.forward.get(i);
+            System.out.print("Level " + i + ": ");
+            while(node != null){
+                System.out.print(node.getKey() + " : " + node.getValue() + " ;");
+                node = node.forward.get(i);
+            }
+            System.out.println();
+        }
+    }
+
     public void saveFile(){
         try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(DATA_STORE))){
             Node<K, V> node = this.header.forward.getFirst();
@@ -145,14 +214,13 @@ public class SkipList<K extends Comparable<K>, V>{
         }catch(IOException error){
             throw new RuntimeException("Failed to save file: ", error);
         }
+        System.out.println("Data saved!");
     }
 
     public void loadFile(){
         try(BufferedReader bufferedReader = new BufferedReader((new FileReader(DATA_STORE)))){
             String data;
             while((data = bufferedReader.readLine()) != null){
-                System.out.println(data);
-
                 Node<K, V> node = stringToNode(data);
                 if(node != null) {
                     insert(node.getKey(), node.getValue());
@@ -161,6 +229,7 @@ public class SkipList<K extends Comparable<K>, V>{
         }catch(IOException error){
             throw new RuntimeException("Failed to load file: ", error);
         }
+        System.out.println("Data loaded!");
     }
 
     @SuppressWarnings("unchecked")
@@ -173,7 +242,7 @@ public class SkipList<K extends Comparable<K>, V>{
             K key = (K)keyString;
             String valueString = data.substring(data.indexOf(":") + 1, data.length() - 1);
             V value = (V)valueString;
-            return new Node<K, V>(key, value, 0);
+            return new Node<>(key, value, 0);
         }
         return null;
     }

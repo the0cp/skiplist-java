@@ -51,7 +51,7 @@ public class SkipList<K extends Comparable<K>, V>{
     /**
      * header of the skip list
      */
-    private Node<K, V> header;
+    private final Node<K, V> header;
     /**
      * current level of the skip list
      */
@@ -69,6 +69,10 @@ public class SkipList<K extends Comparable<K>, V>{
 
     private Node<K, V> createNode(K key, V value, int level){
         return new Node<>(key, value, level);
+    }
+
+    public int size(){
+        return nodeCnt;
     }
 
     /**
@@ -147,7 +151,7 @@ public class SkipList<K extends Comparable<K>, V>{
                 insertNode.forward.set(i, updateTable.get(i).forward.get(i));
                 updateTable.get(i).forward.set(i, insertNode);
             }
-            nodeCnt++;
+            this.nodeCnt++;
             return true;
         }
         return false;
@@ -192,6 +196,7 @@ public class SkipList<K extends Comparable<K>, V>{
      * list current skip list
      */
     public void list(){
+        System.out.println("Listing " + this.size() + " nodes...");
         for(int i = this.curLevel; i >= 0; i--){
             Node<K, V> node = this.header.forward.get(i);
             System.out.print("Level " + i + ": ");
@@ -229,7 +234,7 @@ public class SkipList<K extends Comparable<K>, V>{
         }catch(IOException error){
             throw new RuntimeException("Failed to load file: ", error);
         }
-        System.out.println("Data loaded!");
+        System.out.println("Data loaded: " + this.size());
     }
 
     @SuppressWarnings("unchecked")

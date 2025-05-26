@@ -132,29 +132,26 @@ public class SkipList<K extends Comparable<K>, V>{
 
         if(cur != null && cur.getKey().compareTo(key) == 0){    // same key, replace value
             cur.setValue(value);
-            return true;
+            return false;
         }
 
         int randLevel = randomLevel();
 
-        if(cur == null || cur.getKey().compareTo(key) != 0){    // different key, insert node
-            if(randLevel > curLevel){
-                for(int i = curLevel + 1; i < randLevel + 1; i++){
-                    updateTable.set(i, header);
-                }
-                curLevel = randLevel;
+        if(randLevel > curLevel){
+            for(int i = curLevel + 1; i < randLevel + 1; i++){
+                updateTable.set(i, header);
             }
-
-            Node<K, V> insertNode = createNode(key, value, randLevel);
-
-            for(int i = 0; i <= randLevel; i++){    // insert node and index
-                insertNode.forward.set(i, updateTable.get(i).forward.get(i));
-                updateTable.get(i).forward.set(i, insertNode);
-            }
-            this.nodeCnt++;
-            return true;
+            curLevel = randLevel;
         }
-        return false;
+
+        Node<K, V> insertNode = createNode(key, value, randLevel);
+        
+        for(int i = 0; i <= randLevel; i++){    // insert node and index
+            insertNode.forward.set(i, updateTable.get(i).forward.get(i));
+            updateTable.get(i).forward.set(i, insertNode);
+        }
+        this.nodeCnt++;
+        return true;
     }
 
     /**
